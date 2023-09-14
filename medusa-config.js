@@ -33,13 +33,17 @@ const DATABASE_URL =
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:9000";
+
 const plugins = [
   `medusa-fulfillment-manual`,
   `medusa-payment-manual`,
   {
     resolve: `@medusajs/file-local`,
+    /** @type {import('@medusajs/file-local').PluginOptions} */
     options: {
       upload_dir: "uploads",
+      backend_url: BACKEND_URL,
     },
   },
   {
