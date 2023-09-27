@@ -159,6 +159,24 @@ export namespace Asaas {
     export type CancelCharge = {
       chargeId: string;
     };
+
+    export type RefundCharge = {
+      chargeId: string;
+      value?: number;
+      description?: string;
+    };
+
+    export type UpdateCharge = {
+      chargeId: string;
+      customer?: string;
+      billingType?: BILLING_TYPE;
+      value?: string;
+      dueDate?: Date;
+      description?: string;
+      externalReference?: string;
+      installmentCount?: number;
+      installmentValue?: number;
+    };
   }
 
   export namespace Response {
@@ -168,5 +186,7 @@ export namespace Asaas {
     export type GetQRCode = QRCode;
     export type GetCharge = Charge;
     export type CancelCharge = CancelResponse;
+    export type RefundCharge = Charge;
+    export type UpdateCharge = Charge;
   }
 }

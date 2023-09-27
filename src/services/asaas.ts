@@ -91,6 +91,32 @@ class AsaasService extends TransactionBaseService {
 
     return data;
   }
+
+  public async refundCharge(
+    params: Asaas.Request.RefundCharge
+  ): Promise<Asaas.Response.RefundCharge> {
+    console.log("refunding charge in asaas with params", { params });
+
+    const { data } = await this.apiClient.post<Asaas.Response.RefundCharge>(
+      `/payments/${params.chargeId}/refund`,
+      { ...params }
+    );
+
+    return data;
+  }
+
+  public async updateCharge(
+    params: Asaas.Request.UpdateCharge
+  ): Promise<Asaas.Response.UpdateCharge> {
+    console.log("updating charge in asaas with params", { params });
+
+    const { data } = await this.apiClient.post<Asaas.Response.UpdateCharge>(
+      `/payments/${params.chargeId}`,
+      { ...params }
+    );
+
+    return data;
+  }
 }
 
 export default AsaasService;

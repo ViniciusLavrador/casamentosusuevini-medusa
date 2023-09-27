@@ -1,3 +1,5 @@
+// TODO: WEBHOOKS, FINISH THE METHODS HERE
+
 import {
   AbstractPaymentProcessor,
   Cart,
@@ -237,23 +239,79 @@ class Pix extends AbstractPaymentProcessor {
     }
   }
   async refundPayment(
-    paymentSessionData: Record<string, unknown>,
+    paymentSessionData: PaymentSessionData,
     refundAmount: number
-  ): Promise<Record<string, unknown> | PaymentProcessorError> {
-    throw new Error("Method not implemented.");
+  ): Promise<PaymentSessionData | PaymentProcessorError> {
+    const refundedCharge = await this.asaas.refundCharge({
+      chargeId: paymentSessionData.charge.id,
+      value: refundAmount,
+      description: "Refund",
+    });
+
+    return {
+      ...paymentSessionData,
+      charge: refundedCharge,
+    };
   }
   async retrievePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<Record<string, unknown> | PaymentProcessorError> {
-    throw new Error("Method not implemented.");
+    paymentSessionData: PaymentSessionData
+  ): Promise<PaymentSessionData | PaymentProcessorError> {
+    const charge = await this.asaas.getCharge({
+      chargeId: paymentSessionData.charge.id,
+    });
+    return {
+      ...paymentSessionData,
+      charge,
+    };
   }
   async updatePayment(
     context: PaymentProcessorContext
   ): Promise<void | PaymentProcessorError | PaymentProcessorSessionResponse> {
-    throw new Error("Method not implemented.");
+    console.log("ME");
+    const { amount, customer, paymentSessionData } = context;
+
+    if (
+      customer.metadata.cpf !==
+      (paymentSessionData as PaymentSessionData).customer.cpfCnpj
+    ) {
+      try {
+        return this.initiatePayment(context);
+      } catch (err) {
+        return this.buildError(
+          "unable to update payment because the initiate payment operation failed for the new customer",
+          err
+        );
+      }
+    }
+
+    if (
+      amount &&
+      (paymentSessionData as PaymentSessionData).charge.value === amount
+    ) {
+      return;
+    }
+
+    try {
+      const updatedCharge = await this.asaas.updateCharge({
+        chargeId: (paymentSessionData as PaymentSessionData).charge.id,
+        value: (amount / 100).toFixed(2),
+      });
+
+      return {
+        session_data: {
+          ...paymentSessionData,
+          charge: updatedCharge,
+        },
+      };
+    } catch (err) {
+      return this.buildError(
+        "unable to update payment because the update charge operation failed",
+        err
+      );
+    }
   }
 
-  updatePaymentData(
+  async updatePaymentData(
     sessionId: string,
     data: Record<string, unknown>
   ): Promise<Record<string, unknown> | PaymentProcessorError> {
