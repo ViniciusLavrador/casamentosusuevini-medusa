@@ -94,7 +94,6 @@ class Pix extends AbstractPaymentProcessor {
     }
   }
 
-  // WIP
   async authorizePayment(
     paymentSessionData: PaymentSessionData,
     context: Record<string, unknown> & { cart_id: string }
@@ -146,7 +145,7 @@ class Pix extends AbstractPaymentProcessor {
     try {
       const charge = await this.asaas.createCharge({
         customer: paymentSessionData.customer.id,
-        billingType: "BOLETO",
+        billingType: "UNDEFINED",
         value: (cart.total / 100).toFixed(2),
         dueDate: new Date(),
         externalReference: context.cart_id,
@@ -267,7 +266,6 @@ class Pix extends AbstractPaymentProcessor {
   async updatePayment(
     context: PaymentProcessorContext
   ): Promise<void | PaymentProcessorError | PaymentProcessorSessionResponse> {
-    console.log("ME");
     const { amount, customer, paymentSessionData } = context;
 
     if (
@@ -313,9 +311,9 @@ class Pix extends AbstractPaymentProcessor {
 
   async updatePaymentData(
     sessionId: string,
-    data: Record<string, unknown>
-  ): Promise<Record<string, unknown> | PaymentProcessorError> {
-    throw new Error("Method not implemented.");
+    data: PaymentSessionData
+  ): Promise<PaymentSessionData | PaymentProcessorError> {
+    return { ...data };
   }
 }
 
