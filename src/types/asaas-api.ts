@@ -21,6 +21,29 @@ export namespace Asaas {
     | "DUNNING_RECEIVED"
     | "AWAITING_RISK_ANALYSIS";
 
+  type CHARGE_WEBHOOK_EVENT =
+    | "PAYMENT_CREATED"
+    | "PAYMENT_AWAITING_RISK_ANALYSIS"
+    | "PAYMENT_APPROVED_BY_RISK_ANALYSIS"
+    | "PAYMENT_REPROVED_BY_RISK_ANALYSIS"
+    | "PAYMENT_UPDATED"
+    | "PAYMENT_CONFIRMED"
+    | "PAYMENT_RECEIVED"
+    | "PAYMENT_ANTICIPATED"
+    | "PAYMENT_OVERDUE"
+    | "PAYMENT_DELETED"
+    | "PAYMENT_RESTORED"
+    | "PAYMENT_REFUNDED"
+    | "PAYMENT_REFUND_IN_PROGRESS"
+    | "PAYMENT_RECEIVED_IN_CASH_UNDONE"
+    | "PAYMENT_CHARGEBACK_REQUESTED"
+    | "PAYMENT_CHARGEBACK_DISPUTE"
+    | "PAYMENT_AWAITING_CHARGEBACK_REVERSAL"
+    | "PAYMENT_DUNNING_RECEIVED"
+    | "PAYMENT_DUNNING_REQUESTED"
+    | "PAYMENT_BANK_SLIP_VIEWED"
+    | "PAYMENT_CHECKOUT_VIEWED";
+
   type ListResponse<T> = {
     object: LIST_OBJECT;
     hasMore: boolean;
@@ -94,8 +117,8 @@ export namespace Asaas {
     status?: CHARGE_STATUS;
     description?: string;
     externalReference?: string;
-    originalValue?: string;
-    interestValue?: string;
+    originalValue?: number;
+    interestValue?: number;
     originalDueDate?: Date;
     paymentDate?: Date;
     clientPaymentDate?: Date;
@@ -141,7 +164,7 @@ export namespace Asaas {
       customer: string;
       billingType: BILLING_TYPE;
       dueDate: Date;
-      value?: string;
+      value?: number;
       description?: string;
       externalReference?: string;
       installmentCount?: number;
@@ -170,7 +193,7 @@ export namespace Asaas {
       chargeId: string;
       customer?: string;
       billingType?: BILLING_TYPE;
-      value?: string;
+      value?: number;
       dueDate?: Date;
       description?: string;
       externalReference?: string;
@@ -188,5 +211,12 @@ export namespace Asaas {
     export type CancelCharge = CancelResponse;
     export type RefundCharge = Charge;
     export type UpdateCharge = Charge;
+  }
+
+  export namespace Webhook {
+    export type ChargeParams = {
+      event: CHARGE_WEBHOOK_EVENT;
+      payment: Charge;
+    };
   }
 }

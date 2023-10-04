@@ -33,8 +33,6 @@ class AsaasService extends TransactionBaseService {
   public async createCustomer(
     params: Asaas.Request.CreateCustomer
   ): Promise<Asaas.Response.CreateCustomer> {
-    console.log("creating customer in asaas with params", { params });
-
     const { data } = await this.apiClient.post<Asaas.Response.CreateCustomer>(
       "/customers",
       { ...params }
@@ -46,8 +44,6 @@ class AsaasService extends TransactionBaseService {
   public async createCharge(
     params: Asaas.Request.CreateCharge
   ): Promise<Asaas.Response.CreateCharge> {
-    console.log("creating charge in asaas with params", { params });
-
     const { data } = await this.apiClient.post<Asaas.Response.CreateCharge>(
       "/payments",
       { ...params }
@@ -59,8 +55,6 @@ class AsaasService extends TransactionBaseService {
   public async getCharge(
     params: Asaas.Request.GetCharge
   ): Promise<Asaas.Response.GetCharge> {
-    console.log("getting charge in asaas with params", { params });
-
     const { data } = await this.apiClient.get<Asaas.Response.GetCharge>(
       `/payments/${params.chargeId}`
     );
@@ -71,8 +65,6 @@ class AsaasService extends TransactionBaseService {
   public async getQRCode(
     params: Asaas.Request.GetQRCode
   ): Promise<Asaas.Response.GetQRCode> {
-    console.log("getting QRCode in asaas with params", { params });
-
     const { data } = await this.apiClient.get<Asaas.Response.GetQRCode>(
       `/payments/${params.chargeId}/pixQrCode`
     );
@@ -83,8 +75,6 @@ class AsaasService extends TransactionBaseService {
   public async cancelCharge(
     params: Asaas.Request.CancelCharge
   ): Promise<Asaas.Response.CancelCharge> {
-    console.log("canceling charge in asaas with params", { params });
-
     const { data } = await this.apiClient.delete<Asaas.Response.CancelCharge>(
       `/payments/${params.chargeId}`
     );
@@ -95,8 +85,6 @@ class AsaasService extends TransactionBaseService {
   public async refundCharge(
     params: Asaas.Request.RefundCharge
   ): Promise<Asaas.Response.RefundCharge> {
-    console.log("refunding charge in asaas with params", { params });
-
     const { data } = await this.apiClient.post<Asaas.Response.RefundCharge>(
       `/payments/${params.chargeId}/refund`,
       { ...params }
@@ -108,14 +96,26 @@ class AsaasService extends TransactionBaseService {
   public async updateCharge(
     params: Asaas.Request.UpdateCharge
   ): Promise<Asaas.Response.UpdateCharge> {
-    console.log("updating charge in asaas with params", { params });
-
     const { data } = await this.apiClient.post<Asaas.Response.UpdateCharge>(
       `/payments/${params.chargeId}`,
       { ...params }
     );
 
     return data;
+  }
+
+  public async getOrCreateCustomerByCPF(
+    params: Asaas.Request.CreateCustomer
+  ): Promise<Asaas.Response.CreateCustomer> {
+    const { data: customers } = await this.listCustomers({
+      cpfCnpj: params.cpfCnpj,
+    });
+
+    if (customers.length > 0) {
+      return customers[0];
+    }
+
+    return this.createCustomer(params);
   }
 }
 
