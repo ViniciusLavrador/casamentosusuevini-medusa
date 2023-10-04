@@ -145,6 +145,11 @@ export namespace Asaas {
     expirationDate: Date;
   };
 
+  type Callback = {
+    successUrl: string;
+    autoRedirect?: boolean;
+  };
+
   export namespace Request {
     export type ListCustomers = {
       name?: string;
@@ -169,6 +174,7 @@ export namespace Asaas {
       externalReference?: string;
       installmentCount?: number;
       totalValue?: number;
+      callback?: Callback;
     };
 
     export type GetQRCode = {

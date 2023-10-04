@@ -10,7 +10,7 @@ import { Asaas } from "src/types/asaas-api";
 import { AxiosError } from "axios";
 
 type SessionData = {
-  charge_id: Asaas.Charge["id"];
+  charge: Asaas.Charge;
   customer: Asaas.Customer;
 };
 
@@ -64,11 +64,14 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
         value: context.amount / 100,
         externalReference: context.resource_id,
         description: `Pedido #${context.resource_id}`,
+        callback: {
+          successUrl: `${process.env.ASAAS_REDIRECT_URL}?cart_id=${context.resource_id}`,
+        },
       });
 
       return {
         session_data: {
-          charge_id: charge.id,
+          charge: charge,
           customer: customer,
         } as SessionData,
       };
@@ -82,7 +85,7 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
   ): Promise<Asaas.Charge | PaymentProcessorError> {
     try {
       return await this.asaas.getCharge({
-        chargeId: paymentSessionData.charge_id,
+        chargeId: paymentSessionData.charge.id,
       });
     } catch (error) {
       return this._handleError(error);
@@ -94,7 +97,7 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
   ): Promise<PaymentSessionStatus> {
     const charge = await this.asaas.getCharge({
       chargeId: isPaymentSessionData(paymentSessionData)
-        ? paymentSessionData.charge_id
+        ? paymentSessionData.charge.id
         : paymentSessionData.id,
     });
 
@@ -129,7 +132,7 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
 
     try {
       await this.asaas.updateCharge({
-        chargeId: sessionData.charge_id,
+        chargeId: sessionData.charge.id,
         value: context.amount / 100,
         externalReference: context.resource_id,
         description: `Pedido #${context.resource_id}`,
@@ -147,7 +150,7 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
     paymentSessionData: SessionData
   ): Promise<SessionData | PaymentProcessorError> {
     try {
-      await this.asaas.cancelCharge({ chargeId: paymentSessionData.charge_id });
+      await this.asaas.cancelCharge({ chargeId: paymentSessionData.charge.id });
     } catch (error) {
       return this._handleError(error);
     }
@@ -181,7 +184,7 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
   ): Promise<SessionData | PaymentProcessorError> {
     try {
       await this.asaas.refundCharge({
-        chargeId: paymentSessionData.charge_id,
+        chargeId: paymentSessionData.charge.id,
         value: refundAmount,
       });
 
@@ -212,5 +215,6 @@ export default AsaasPaymentProcessor;
 const isPaymentSessionData = (
   data: SessionData | Asaas.Charge
 ): data is SessionData => {
-  return (data as SessionData).charge_id !== undefined;
+  console.log({ data });
+  return (data as SessionData).charge?.id !== undefined;
 };
