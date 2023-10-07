@@ -47,7 +47,8 @@ class AsaasPaymentProcessor extends AbstractPaymentProcessor {
   async initiatePayment(
     context: PaymentProcessorContext
   ): Promise<PaymentProcessorError | PaymentProcessorSessionResponse> {
-    if (!context.customer.metadata.cpf) throw new Error("Customer has no CPF");
+    if (!context.customer?.metadata?.cpf)
+      throw new Error("Customer has no CPF");
 
     try {
       const customer = await this.asaas.getOrCreateCustomerByCPF({
