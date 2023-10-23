@@ -1,4 +1,4 @@
-import { TransactionBaseService } from "@medusajs/medusa";
+import { CustomerService, TransactionBaseService } from "@medusajs/medusa";
 import { EntityManager, Equal } from "typeorm";
 import RSVPRepository from "src/repositories/rsvp";
 import { RSVP } from "src/models/rsvp";
@@ -7,15 +7,18 @@ import { UpdateRSVPInput } from "src/types/rsvp";
 type InjectedDependencies = {
   manager: EntityManager;
   rsvpRepository: typeof RSVPRepository;
+  customerService: CustomerService;
 };
 
 class RSVPService extends TransactionBaseService {
   protected rsvpRepository_: typeof RSVPRepository;
+  protected customerService_: CustomerService;
 
-  constructor({ rsvpRepository }: InjectedDependencies) {
+  constructor({ rsvpRepository, customerService }: InjectedDependencies) {
     super(arguments[0]);
 
     this.rsvpRepository_ = rsvpRepository;
+    this.customerService_ = customerService;
   }
 
   async retrieve(id: RSVP["id"]): Promise<RSVP | undefined> {
@@ -35,13 +38,19 @@ class RSVPService extends TransactionBaseService {
           this.rsvpRepository_
         );
 
-        const rsvp = await rsvpRepo.insert({
+        let customer = null;
+        if (data.customer_id) {
+          customer = await this.customerService_.retrieve(data.customer_id);
+        }
+
+        const created = rsvpRepo.create({
           name: data.name,
           is_attending: data.is_attending,
-          amountOfGuests: data.amountOfGuests,
+          amountOfGuests: data.amount_of_guests,
+          customer,
         });
 
-        return await this.retrieve(rsvp.identifiers[0].id);
+        return rsvpRepo.save(created);
       }
     );
   }

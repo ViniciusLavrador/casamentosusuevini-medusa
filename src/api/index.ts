@@ -6,6 +6,7 @@ import { getConfigFile } from "medusa-core-utils";
 import { attachStoreRoutes } from "./routes/store";
 import { attachAdminRoutes } from "./routes/admin";
 import { attachHooksRoutes } from "./routes/hooks";
+import { attachGuestsRoutes } from "./routes/guests";
 
 export default (rootDirectory: string): Router | Router[] => {
   // Read currently-loaded medusa config
@@ -32,11 +33,12 @@ export default (rootDirectory: string): Router | Router[] => {
   // Set up root routes for store and admin endpoints, with appropriate CORS settings
   router.use("/store", cors(storeCorsOptions), bodyParser.json());
   router.use("/admin", cors(adminCorsOptions), bodyParser.json());
+  router.use("/guests", cors(storeCorsOptions), bodyParser.json());
   router.use("/hooks", bodyParser.json());
 
   // Add authentication to all admin routes *except* auth and account invite ones
   router.use(
-    /\/admin\/((?!auth)(?!invites)(?!users\/reset-password)(?!users\/password-token).*)/,
+    /\/admin\/((?!auth)(?!invites)(?!rsvp)(?!users\/reset-password)(?!users\/password-token).*)/,
     authenticate()
   );
 
@@ -44,16 +46,19 @@ export default (rootDirectory: string): Router | Router[] => {
   const storeRouter = Router();
   const adminRouter = Router();
   const hooksRouter = Router();
+  const guestsRouter = Router();
 
   // Attach these routers to the root routes
   router.use("/store", storeRouter);
   router.use("/admin", adminRouter);
   router.use("/hooks", hooksRouter);
+  router.use("/guests", guestsRouter);
 
   // Attach custom routes to these routers
   attachStoreRoutes(storeRouter);
   attachAdminRoutes(adminRouter);
   attachHooksRoutes(hooksRouter);
+  attachGuestsRoutes(guestsRouter);
 
   return router;
 };
